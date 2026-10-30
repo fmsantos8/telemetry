@@ -72,6 +72,27 @@ telemetry_status_t cmp_telemetry_send_sample(const telemetry_t *telemetry, const
  */
 telemetry_status_t cmp_telemetry_send_error(const telemetry_t *telemetry, const char *source, int32_t code, uint32_t *transmitted_count);
 
+/**
+ * @brief Send CRLF to terminate a truncated record before the next record.
+ *
+ * @details Attempts the complete two-byte delimiter on every call, without
+ * retaining progress or retrying internally. The caller decides when to retry
+ * and must wait for success before sending another record. Repeated attempts
+ * may add CR bytes or empty lines; receivers must ignore incomplete or empty
+ * lines. Uses the UART's configured timeout and does not reconfigure it.
+ *
+ * @param[in] telemetry Required initialized context.
+ * @param[out] transmitted_count Required accepted byte count, zeroed before validation.
+ *
+ * @retval TELEMETRY_STATUS_OK Both delimiter bytes transmitted.
+ * @retval TELEMETRY_STATUS_INVALID_ARGUMENT A required pointer is NULL or UART rejects the request.
+ * @retval TELEMETRY_STATUS_NOT_INITIALIZED Context or UART is unavailable.
+ * @retval TELEMETRY_STATUS_NOT_SUPPORTED UART operation is unavailable.
+ * @retval TELEMETRY_STATUS_TIMEOUT UART timeout expired; count may be nonzero, including two.
+ * @retval TELEMETRY_STATUS_COMMUNICATION_ERROR UART transfer failed; count may be nonzero, including two.
+ */
+telemetry_status_t cmp_telemetry_resync(const telemetry_t *telemetry, uint32_t *transmitted_count);
+
 #ifdef __cplusplus
 }
 #endif

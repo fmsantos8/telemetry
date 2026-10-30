@@ -102,3 +102,13 @@ telemetry_status_t cmp_telemetry_send_error(const telemetry_t *telemetry, const 
     int32_t length = snprintf(record, sizeof(record), "ERROR;source=%s;code=%" PRId32 "\r\n", source, code);
     return cmp_telemetry_send_record(telemetry, record, length, (uint32_t)sizeof(record), transmitted_count);
 }
+
+telemetry_status_t cmp_telemetry_resync(const telemetry_t *telemetry, uint32_t *transmitted_count) {
+    telemetry_status_t status = cmp_telemetry_require_initialized(telemetry, transmitted_count);
+    if (status != TELEMETRY_STATUS_OK) {
+        return status;
+    }
+
+    const uint8_t delimiter[] = {'\r', '\n'};
+    return cmp_telemetry_translate_status(hal_uart_write(telemetry->uart, delimiter, (uint32_t)sizeof(delimiter), transmitted_count));
+}
